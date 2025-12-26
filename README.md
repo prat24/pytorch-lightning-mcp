@@ -188,3 +188,104 @@ Run the full test suite:
 ```bash
 uv run pytest
 ```
+
+### Docker (recommended)
+
+You can run the MCP server using Docker
+
+<pre class="overflow-visible! px-0!" data-start="1989" data-end="2178"><div class="contain-inline-size rounded-2xl corner-superellipse/1.1 relative bg-token-sidebar-surface-primary"><div class="overflow-y-auto p-4" dir="ltr"><code class="whitespace-pre! language-json"><span><span>{</span><span>
+  </span><span>"mcpServers"</span><span>:</span><span></span><span>{</span><span>
+    </span><span>"Lightning"</span><span>:</span><span></span><span>{</span><span>
+      </span><span>"command"</span><span>:</span><span></span><span>"docker"</span><span>,</span><span>
+      </span><span>"args"</span><span>:</span><span></span><span>[</span><span>
+        </span><span>"run"</span><span>,</span><span>
+        </span><span>"--rm"</span><span>,</span><span>
+        </span><span>"-i"</span><span>,</span><span>
+        </span><span>"lightning-mcp:latest"</span><span>
+      </span><span>]</span><span>
+    </span><span>}</span><span>
+  </span><span>}</span><span>
+</span><span>}</span><span>
+</span></span></code></div></div></pre>
+
+## MCP Tools
+
+The MCP server exposes a small, explicit set of tools that agents can discover and invoke dynamically.
+
+Tool discovery is available via the standard MCP method:
+
+```json
+{
+  "method": "tools/list"
+}
+```
+
+This returns a machine-readable description of all supported tools, including their input schemas.
+
+### Available Tools
+
+#### `lightning.train`
+
+Train a PyTorch Lightning model using an explicit configuration.
+
+This tool allows an agent to:
+
+* instantiate a LightningModule
+* configure a Trainer
+* execute training in-process
+* receive structured training metadata
+
+**Input schema (simplified):**
+
+```json
+{
+  "model": {
+    "_target_": "string",
+    "...": "model-specific arguments"
+  },
+  "trainer": {
+    "...": "trainer configuration (optional)"
+  }
+}
+```
+
+The `model` field is required and must reference a valid LightningModule class.
+
+#### `lightning.inspect`
+
+Inspect a model or the runtime environment without performing training.
+
+This tool can be used to:
+
+* inspect model architecture and parameter counts
+* inspect the execution environment (Python, Torch, Lightning versions, device availability)
+
+**Input schema (simplified):**
+
+```json
+{
+  "what": "model | environment",
+  "model": {
+    "_target_": "string",
+    "...": "model-specific arguments (required for model inspection)"
+  }
+}
+```
+
+### Tool Discovery Example
+
+Using MCP stdio:
+
+```bash
+echo '{"id":"1","method":"tools/list","params":{}}' \
+| uv run python -m lightning_mcp.server
+```
+
+Using Docker:
+
+```bash
+echo '{"id":"1","method":"tools/list","params":{}}' \
+| docker run --rm -i lightning-mcp:latest
+```
+
+The response contains a list of tools with their names, descriptions, and input schemas.

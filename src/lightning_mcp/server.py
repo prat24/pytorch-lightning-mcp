@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import json
 import sys
 import traceback
@@ -7,6 +8,7 @@ from typing import TextIO
 from lightning_mcp.protocol import MCPRequest, MCPResponse, MCPError
 from lightning_mcp.handlers.train import TrainHandler
 from lightning_mcp.handlers.inspect import InspectHandler
+from lightning_mcp.tools import list_tools
 
 
 class MCPServer:
@@ -24,7 +26,6 @@ class MCPServer:
         self.stdin = stdin or sys.stdin
         self.stdout = stdout or sys.stdout
 
-        # Register handlers
         self._train_handler = TrainHandler()
         self._inspect_handler = InspectHandler()
 
@@ -48,6 +49,12 @@ class MCPServer:
         return MCPRequest(**data)
 
     def _dispatch(self, request: MCPRequest) -> MCPResponse:
+        if request.method == "tools/list":
+            return MCPResponse(
+                id=request.id,
+                result={"tools": list_tools()},
+            )
+
         if request.method == "lightning/train":
             return self._train_handler.handle(request)
 
@@ -79,7 +86,6 @@ class MCPServer:
 
 
 def main() -> None:
-    """Entry point for running the MCP server."""
     server = MCPServer()
     server.serve_forever()
 
