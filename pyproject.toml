@@ -27,6 +27,10 @@ dev = [
   "ruff",
   "mypy",
 ]
+server = [
+  "fastapi>=0.110",
+  "uvicorn>=0.29",
+]
 
 [build-system]
 requires = ["hatchling"]
