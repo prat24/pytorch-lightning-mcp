@@ -11,11 +11,13 @@ class TrainHandler:
     """Handle MCP training requests."""
 
     def __init__(self) -> None:
-        self._trainer_service = LightningTrainerService()
+        pass
 
     def handle(self, request: MCPRequest) -> MCPResponse:
         model = self._load_model(request.params)
-        self._trainer_service.fit(model)
+        trainer = self._load_trainer(request.params)
+
+        trainer.fit(model)
 
         return MCPResponse(
             id=request.id,
@@ -89,3 +91,22 @@ class TrainHandler:
             ) from exc
 
         return model
+
+    def _load_trainer(self, params: dict[str, Any]) -> LightningTrainerService:
+        """Instantiate a LightningTrainerService from config.
+
+        Expected format:
+        {
+            "trainer": {
+                "max_epochs": 5,
+                "accelerator": "auto",
+                ...
+            }
+        }
+        """
+        trainer_cfg = params.get("trainer", {})
+
+        if not isinstance(trainer_cfg, dict):
+            raise TypeError("'trainer' must be a dict if provided")
+
+        return LightningTrainerService(**trainer_cfg)
