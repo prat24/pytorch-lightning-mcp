@@ -1,34 +1,29 @@
 from __future__ import annotations
+import sys
 from typing import Any
 import pytorch_lightning as pl
+import torch
 from pytorch_lightning.utilities.model_summary import ModelSummary
 
 from lightning_mcp.protocol import MCPRequest, MCPResponse
-from lightning_mcp.handlers.train import TrainHandler
-
+from lightning_mcp.handlers.train import _load_model
 
 class InspectHandler:
-    """Handle MCP inspection requests.
-
-    Inspection is read-only and has no side effects.
-    """
+    """Production-grade inspection handler (read-only)."""
 
     def handle(self, request: MCPRequest) -> MCPResponse:
         params = request.params
         what = params.get("what")
 
-        if what is None:
-            raise ValueError("Missing 'what' field in inspect params")
+        if not isinstance(what, str):
+            raise ValueError("Inspect requires 'what' field")
 
-        # Reuse the SAME model-loading logic as training
-        model = self._load_model(params)
-
-        if what == "model_summary":
-            result = self._model_summary(model)
-        elif what == "num_parameters":
-            result = self._num_parameters(model)
-        elif what == "hyperparameters":
-            result = self._hyperparameters(model)
+        if what == "model":
+            result = self._inspect_model(params)
+        elif what == "environment":
+            result = self._inspect_environment()
+        elif what == "summary":
+            result = self._inspect_summary(params)
         else:
             raise ValueError(f"Unknown inspect target '{what}'")
 
@@ -37,26 +32,27 @@ class InspectHandler:
             result=result,
         )
 
-    # --- helpers ---
+    def _inspect_model(self, params: dict[str, Any]) -> dict[str, Any]:
+        model = _load_model(params)
+        return {
+            "class": model.__class__.__name__,
+            "num_parameters": sum(p.numel() for p in model.parameters()),
+            "trainable_parameters": sum(
+                p.numel() for p in model.parameters() if p.requires_grad
+            ),
+            "hyperparameters": dict(model.hparams),
+        }
 
-    def _load_model(self, params: dict[str, Any]) -> pl.LightningModule:
-        """Reuse TrainHandler model loading logic."""
-        return TrainHandler()._load_model(params)
-
-    def _model_summary(self, model: pl.LightningModule) -> dict[str, Any]:
+    def _inspect_summary(self, params: dict[str, Any]) -> dict[str, str]:
+        model = _load_model(params)
         summary = ModelSummary(model, max_depth=2)
+        return {"summary": str(summary)}
+
+    def _inspect_environment(self) -> dict[str, Any]:
         return {
-            "summary": str(summary),
+            "python": sys.version,
+            "torch": torch.__version__,
+            "lightning": pl.__version__,
+            "cuda_available": torch.cuda.is_available(),
+            "mps_available": torch.backends.mps.is_available(),
         }
-
-    def _num_parameters(self, model: pl.LightningModule) -> dict[str, int]:
-        total = sum(p.numel() for p in model.parameters())
-        trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
-
-        return {
-            "total": total,
-            "trainable": trainable,
-        }
-
-    def _hyperparameters(self, model: pl.LightningModule) -> dict[str, Any]:
-        return dict(model.hparams)
