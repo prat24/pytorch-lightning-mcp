@@ -1,155 +1,83 @@
-# PyTorch Lightning MCP (Model Context Protocol)
+# PyTorch Lightning MCP
 
-An integration layer that exposes **PyTorch Lightning** through a structured, machine-readable API.
-
-Intended for programmatic use by tools, agents, and orchestration systems.
+An **MCP (Model Context Protocol) server** that exposes **PyTorch Lightning** training and inspection capabilities through a structured, machine-readable interface.
 
 ## Features
 
-* Structured training and inspection APIs
-* Real PyTorch Lightning execution
-* Explicit, config-driven behavior
+* MCP-compliant server
+* Stdio transport (primary)
+* HTTP transport (optional)
+* Explicit, config-driven execution
 * Safe model instantiation
-* Stdio and HTTP servers
-* Fully tested core logic
-* Clean separation between protocol, capabilities, and transport
+* Tool discovery via `tools/list`
+* Clean separation between protocol, tools, and transport
+
 
 ## Project Structure
 
 ```
 src/lightning_mcp/
-├── protocol.py          # Request / response schema
+├── protocol.py          # MCP request / response models
 ├── handlers/
-│   ├── train.py         # Training capability
-│   └── inspect.py       # Inspection capability
+│   ├── train.py         # lightning.train tool
+│   └── inspect.py       # lightning.inspect tool
 ├── lightning/
-│   └── trainer.py       # Lightning integration boundary
-├── server.py            # Stdio server
-├── http_server.py       # HTTP server (FastAPI)
-├── models/
-│   └── simple.py        # Example LightningModule
-├── tools.py             # Expose tools
-tests/                   # Simple test suite
+│   └── trainer.py       # Lightning execution boundary
+├── tools.py             # Tool registry
+├── server.py            # MCP stdio server
+├── http_server.py       # MCP HTTP server (FastAPI)
+├── cli.py               # CLI entrypoint
+tests/
 ```
 
 ## Requirements
 
 * Python 3.10 – 3.12
-* PyTorch Lightning (compatible versions)
-* uv (recommended)
+* PyTorch ≥ 2.0
+* PyTorch Lightning ≥ 2.x
+* `uv` (recommended)
 
-## Installation (using uv)
+## Installation
 
-### 1. Install uv (if not already installed)
-
-```bash
-curl -Ls https://astral.sh/uv/install.sh | sh
-```
-
-Restart your shell after installation.
-
-Verify:
+We recommend that you use uv - an extremely fast Python package and project manager, written in Rust.
+Install it using curl: ``` curl -LsSf https://astral.sh/uv/install.sh | sh```
 
 ```bash
-uv --version
-```
-
-### 2. Clone the repository
-
-```bash
-git clone https://github.com/<your-org>/lightning-mcp.git
-cd lightning-mcp
-```
-
-### 3. Install dependencies
-
-To install all dependencies (including server extras):
-
-```bash
+git clone https://github.com/prat24/pytorch-lightning-mcp
+cd pytorch-lightning-mcp
 uv sync --all-extras
 ```
 
-This will:
+## Running the MCP Server
 
-* create a local virtual environment
-* install PyTorch Lightning and dependencies
-* install HTTP server dependencies (FastAPI, Uvicorn)
+### Stdio
 
-No manual venv management is required.
-
-## Usage
-
-### Training (in-process)
-
-```python
-from lightning_mcp.handlers.train import TrainHandler
-from lightning_mcp.protocol import MCPRequest
-
-handler = TrainHandler()
-
-request = MCPRequest(
-    id="train-1",
-    method="lightning.train",
-    params={
-        "model": {
-            "_target_": "lightning_mcp.models.simple.SimpleClassifier",
-            "input_dim": 4,
-            "num_classes": 3,
-        },
-        "trainer": {
-            "max_epochs": 1,
-            "accelerator": "cpu",
-        },
-    },
-)
-
-response = handler.handle(request)
-```
-
-### Inspection (in-process)
-
-```python
-from lightning_mcp.handlers.inspect import InspectHandler
-from lightning_mcp.protocol import MCPRequest
-
-handler = InspectHandler()
-
-request = MCPRequest(
-    id="inspect-1",
-    method="lightning.inspect",
-    params={
-        "what": "environment"
-    },
-)
-
-response = handler.handle(request)
-```
-
-## Stdio Server
-
-The stdio server reads one JSON request per line from stdin and writes one JSON response per line to stdout.
-
-### Run
+This is the **primary MCP transport** and the one expected by MCP clients.
 
 ```bash
-uv run python -m lightning_mcp.server
+uv run lightning-mcp
 ```
+
+The server:
+
+* reads one MCP request per line from **stdin**
+* writes one MCP response per line to **stdout**
 
 ### Example
 
 ```bash
-echo '{"id":"1","method":"lightning.inspect","params":{"what":"environment"}}' \
-| uv run python -m lightning_mcp.server
+echo '{"id":"1","method":"tools/list","params":{}}' \
+| uv run lightning-mcp
 ```
 
 ## HTTP Server
 
-The HTTP server exposes a single MCP endpoint.
+The HTTP server exposes the **same MCP interface** over HTTP.
 
 ### Run
 
 ```bash
-uv run uvicorn lightning_mcp.http_server:app --host 0.0.0.0 --port 3333
+uv run lightning-mcp --http --port 3333
 ```
 
 ### Endpoint
@@ -158,89 +86,51 @@ uv run uvicorn lightning_mcp.http_server:app --host 0.0.0.0 --port 3333
 POST /mcp
 ```
 
-### Example (curl)
+### Example
 
 ```bash
 curl -X POST http://localhost:3333/mcp \
   -H "Content-Type: application/json" \
   -d '{
-    "id": "train-http-1",
-    "method": "lightning.train",
-    "params": {
-      "model": {
-        "_target_": "lightning_mcp.models.simple.SimpleClassifier",
-        "input_dim": 4,
-        "num_classes": 3
-      },
-      "trainer": {
-        "max_epochs": 1,
-        "accelerator": "cpu"
-      }
-    }
+    "id": "inspect-1",
+    "method": "lightning.inspect",
+    "params": { "what": "environment" }
   }'
 ```
 
-## Testing
-
-Run the full test suite:
-
-```bash
-uv run pytest
-```
-
-### Docker (recommended)
-
-You can run the MCP server using Docker
-
-<pre class="overflow-visible! px-0!" data-start="1989" data-end="2178"><div class="contain-inline-size rounded-2xl corner-superellipse/1.1 relative bg-token-sidebar-surface-primary"><div class="overflow-y-auto p-4" dir="ltr"><code class="whitespace-pre! language-json"><span><span>{</span><span>
-  </span><span>"mcpServers"</span><span>:</span><span></span><span>{</span><span>
-    </span><span>"Lightning"</span><span>:</span><span></span><span>{</span><span>
-      </span><span>"command"</span><span>:</span><span></span><span>"docker"</span><span>,</span><span>
-      </span><span>"args"</span><span>:</span><span></span><span>[</span><span>
-        </span><span>"run"</span><span>,</span><span>
-        </span><span>"--rm"</span><span>,</span><span>
-        </span><span>"-i"</span><span>,</span><span>
-        </span><span>"lightning-mcp:latest"</span><span>
-      </span><span>]</span><span>
-    </span><span>}</span><span>
-  </span><span>}</span><span>
-</span><span>}</span><span>
-</span></span></code></div></div></pre>
-
 ## MCP Tools
-
-The MCP server exposes a small, explicit set of tools that agents can discover and invoke dynamically.
 
 Tool discovery is available via the standard MCP method:
 
 ```json
 {
-  "method": "tools/list"
+  "id": "tools-1",
+  "method": "tools/list",
+  "params": {}
 }
 ```
 
-This returns a machine-readable description of all supported tools, including their input schemas.
+The response contains a machine-readable description of all supported tools and their input schemas.
 
-### Available Tools
 
-#### `lightning.train`
+### `lightning.train`
 
 Train a PyTorch Lightning model using an explicit configuration.
 
-This tool allows an agent to:
+**Purpose**
 
-* instantiate a LightningModule
-* configure a Trainer
-* execute training in-process
-* receive structured training metadata
+* Instantiate a `LightningModule`
+* Configure a `Trainer`
+* Execute training in-process
+* Return structured metadata
 
-**Input schema (simplified):**
+**Input (simplified)**
 
 ```json
 {
   "model": {
     "_target_": "string",
-    "...": "model-specific arguments"
+    "...": "model arguments"
   },
   "trainer": {
     "...": "trainer configuration (optional)"
@@ -248,46 +138,61 @@ This tool allows an agent to:
 }
 ```
 
-The `model` field is required and must reference a valid LightningModule class.
+### `lightning.inspect`
 
-#### `lightning.inspect`
+Inspect a model or the runtime environment without training.
 
-Inspect a model or the runtime environment without performing training.
+**Supported inspections**
 
-This tool can be used to:
+* Environment (Python, Torch, Lightning, devices)
+* Model structure and parameters
 
-* inspect model architecture and parameter counts
-* inspect the execution environment (Python, Torch, Lightning versions, device availability)
-
-**Input schema (simplified):**
+**Input (simplified)**
 
 ```json
 {
   "what": "model | environment",
   "model": {
     "_target_": "string",
-    "...": "model-specific arguments (required for model inspection)"
+    "...": "model arguments (required for model inspection)"
   }
 }
 ```
 
-### Tool Discovery Example
+## Docker
 
-Using MCP stdio:
+The container runs the MCP stdio server.
 
-```bash
-echo '{"id":"1","method":"tools/list","params":{}}' \
-| uv run python -m lightning_mcp.server
+It:
+
+* reads MCP requests from **stdin**
+* writes MCP responses to **stdout**
+
+Example MCP client configuration:
+
+```json
+{
+  "mcpServers": {
+    "Lightning": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "lightning-mcp:latest"
+      ]
+    }
+  }
+}
 ```
 
-Using Docker:
+## Testing
+
+Run the test suite:
 
 ```bash
-echo '{"id":"1","method":"tools/list","params":{}}' \
-| docker run --rm -i lightning-mcp:latest
+uv run pytest
 ```
-
-The response contains a list of tools with their names, descriptions, and input schemas.
 
 ## Demo
 
@@ -297,8 +202,7 @@ Below is a quick example of an agent-driven interaction with the MCP server usin
 
 Start the MCP server:
 
-<pre class="overflow-visible! px-0!" data-start="536" data-end="597"><div class="contain-inline-size rounded-2xl corner-superellipse/1.1 relative bg-token-sidebar-surface-primary"><div class="overflow-y-auto p-4" dir="ltr"><code class="whitespace-pre! language-bash"><span><span>uvicorn lightning_mcp.http_server:app --port 8000
-</span></span></code></div></div></pre>
+
 
 ```
 INFO:     Started server process [15724]
