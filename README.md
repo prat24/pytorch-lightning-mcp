@@ -1,6 +1,6 @@
 # PyTorch Lightning MCP (Model Context Protocol)
 
-An integration layer that exposes **PyTorch Lightning training and inspection** through a structured, machine-readable API.
+An integration layer that exposes **PyTorch Lightning** through a structured, machine-readable API.
 
 Intended for programmatic use by tools, agents, and orchestration systems.
 
@@ -28,9 +28,8 @@ src/lightning_mcp/
 ├── http_server.py       # HTTP server (FastAPI)
 ├── models/
 │   └── simple.py        # Example LightningModule
-tests/
-├── test_train.py
-└── test_inspect.py
+├── tools.py             # Expose tools
+tests/                   # Simple test suite
 ```
 
 ## Requirements
@@ -90,7 +89,7 @@ handler = TrainHandler()
 
 request = MCPRequest(
     id="train-1",
-    method="lightning/train",
+    method="lightning.train",
     params={
         "model": {
             "_target_": "lightning_mcp.models.simple.SimpleClassifier",
@@ -117,7 +116,7 @@ handler = InspectHandler()
 
 request = MCPRequest(
     id="inspect-1",
-    method="lightning/inspect",
+    method="lightning.inspect",
     params={
         "what": "environment"
     },
@@ -139,7 +138,7 @@ uv run python -m lightning_mcp.server
 ### Example
 
 ```bash
-echo '{"id":"1","method":"lightning/inspect","params":{"what":"environment"}}' \
+echo '{"id":"1","method":"lightning.inspect","params":{"what":"environment"}}' \
 | uv run python -m lightning_mcp.server
 ```
 
@@ -166,7 +165,7 @@ curl -X POST http://localhost:3333/mcp \
   -H "Content-Type: application/json" \
   -d '{
     "id": "train-http-1",
-    "method": "lightning/train",
+    "method": "lightning.train",
     "params": {
       "model": {
         "_target_": "lightning_mcp.models.simple.SimpleClassifier",

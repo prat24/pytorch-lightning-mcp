@@ -19,7 +19,7 @@ def test_http_inspect_environment():
         "/mcp",
         json={
             "id": "http-1",
-            "method": "lightning/inspect",
+            "method": "lightning.inspect",
             "params": {
                 "what": "environment",
             },

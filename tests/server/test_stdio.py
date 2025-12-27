@@ -16,7 +16,7 @@ def test_stdio_server_inspect_environment_roundtrip():
 
     request = {
         "id": "stdio-1",
-        "method": "lightning/inspect",
+        "method": "lightning.inspect",
         "params": {
             "what": "environment",
         },

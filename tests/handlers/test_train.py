@@ -16,7 +16,7 @@ def test_train_simple_model_cpu():
 
     request = MCPRequest(
         id="train-test-1",
-        method="lightning/train",
+        method="lightning.train",
         params={
             "model": {
                 "_target_": "lightning_mcp.models.simple.SimpleClassifier",

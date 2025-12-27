@@ -13,7 +13,7 @@ def test_train_rejects_non_lightning_module():
 
     request = MCPRequest(
         id="bad-model",
-        method="lightning/train",
+        method="lightning.train",
         params={
             "model": {
                 "_target_": "math.sqrt"
@@ -34,7 +34,7 @@ def test_train_missing_model_config():
 
     request = MCPRequest(
         id="missing-model",
-        method="lightning/train",
+        method="lightning.train",
         params={},
     )
 

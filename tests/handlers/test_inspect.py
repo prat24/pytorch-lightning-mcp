@@ -11,7 +11,7 @@ def test_inspect_model_metadata():
 
     request = MCPRequest(
         id="inspect-model",
-        method="lightning/inspect",
+        method="lightning.inspect",
         params={
             "what": "model",
             "model": {
@@ -43,7 +43,7 @@ def test_inspect_environment():
 
     request = MCPRequest(
         id="inspect-env",
-        method="lightning/inspect",
+        method="lightning.inspect",
         params={
             "what": "environment",
         },

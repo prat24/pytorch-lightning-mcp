@@ -13,7 +13,7 @@ def test_inspect_unknown_target():
 
     request = MCPRequest(
         id="inspect-bad",
-        method="lightning/inspect",
+        method="lightning.inspect",
         params={
             "what": "does-not-exist",
         },
@@ -32,7 +32,7 @@ def test_inspect_model_missing_config():
 
     request = MCPRequest(
         id="inspect-missing-model",
-        method="lightning/inspect",
+        method="lightning.inspect",
         params={
             "what": "model",
         },
