@@ -37,5 +37,5 @@ class MCPResponse(BaseModel):
 class MCPMethod:
     """Known MCP methods exposed by lightning-mcp."""
 
-    TRAIN: Literal["lightning/train"] = "lightning/train"
-    INSPECT: Literal["lightning/inspect"] = "lightning/inspect"
+    TRAIN: Literal["lightning.train"] = "lightning.train"
+    INSPECT: Literal["lightning.inspect"] = "lightning.inspect"

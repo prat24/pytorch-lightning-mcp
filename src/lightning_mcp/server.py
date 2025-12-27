@@ -55,10 +55,10 @@ class MCPServer:
                 result={"tools": list_tools()},
             )
 
-        if request.method == "lightning/train":
+        if request.method == "lightning.train":
             return self._train_handler.handle(request)
 
-        if request.method == "lightning/inspect":
+        if request.method == "lightning.inspect":
             return self._inspect_handler.handle(request)
 
         return MCPResponse(

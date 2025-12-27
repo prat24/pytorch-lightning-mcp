@@ -19,10 +19,10 @@ def handle_mcp(request: MCPRequest) -> MCPResponse:
             result={"tools": list_tools()},
         )
 
-    if request.method == "lightning/train":
+    if request.method == "lightning.train":
         return train_handler.handle(request)
 
-    if request.method == "lightning/inspect":
+    if request.method == "lightning.inspect":
         return inspect_handler.handle(request)
 
     return MCPResponse(
