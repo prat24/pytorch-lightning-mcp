@@ -7,7 +7,7 @@ Intended for programmatic use by tools, agents, and orchestration systems.
 ## Features
 
 * Structured training and inspection APIs
-* Real PyTorch Lightning execution (no mocks)
+* Real PyTorch Lightning execution
 * Explicit, config-driven behavior
 * Safe model instantiation
 * Stdio and HTTP servers
