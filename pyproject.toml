@@ -18,6 +18,8 @@ dependencies = [
   "rich>=13.7",
   "mcp>=0.1.0",
   "pyproject-toml>=0.1.0",
+  "requests>=2.31",
+  "openai>=1.0",
 ]
 
 [project.optional-dependencies]

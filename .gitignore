@@ -36,3 +36,5 @@ htmlcov/
 lightning_logs/
 checkpoints/
 logs/
+
+openai_agent_demo.py

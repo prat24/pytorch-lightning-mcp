@@ -289,3 +289,55 @@ echo '{"id":"1","method":"tools/list","params":{}}' \
 ```
 
 The response contains a list of tools with their names, descriptions, and input schemas.
+
+## Demo
+
+Below is a quick example of an agent-driven interaction with the MCP server using OpenAI tool calling. The agent decides which MCP tool to use, executes exactly one action, and then summarizes the result.
+
+### Running the demo
+
+Start the MCP server:
+
+<pre class="overflow-visible! px-0!" data-start="536" data-end="597"><div class="contain-inline-size rounded-2xl corner-superellipse/1.1 relative bg-token-sidebar-surface-primary"><div class="overflow-y-auto p-4" dir="ltr"><code class="whitespace-pre! language-bash"><span><span>uvicorn lightning_mcp.http_server:app --port 8000
+</span></span></code></div></div></pre>
+
+```
+INFO:     Started server process [15724]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+```
+
+Run the demo on an agent of choice
+For example: running using an **OpenAI-based agent** that adapts MCP for use with OpenAI’s tool-calling interface, we may get:
+
+```
+Discovered MCP tools:
+  OpenAI: lightning_train  ->  MCP: lightning.train
+  OpenAI: lightning_inspect  ->  MCP: lightning.inspect
+
+Agent → MCP: lightning.inspect
+Args:
+{
+  "what": "environment"
+}
+
+MCP Result:
+{
+  "python": "3.11.14 (main, Oct 31 2025, 23:15:22) [Clang 21.1.4 ]",
+  "torch": "2.9.1",
+  "lightning": "2.6.0",
+  "cuda_available": false,
+  "mps_available": true
+}
+
+The inspection of the environment reveals the following setup:
+
+- Python version: 3.11.14
+- PyTorch version: 2.9.1
+- PyTorch Lightning version: 2.6.0
+- CUDA support: Not available
+- Apple MPS (Metal Performance Shaders) support: Available
+
+This setup indicates that the system is equipped for machine learning tasks using PyTorch and PyTorch Lightning on Apple hardware with MPS support for accelerated computing, but without CUDA support.
+```
