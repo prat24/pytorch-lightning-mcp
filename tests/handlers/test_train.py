@@ -35,18 +35,25 @@ def test_train_simple_model_cpu():
     assert response.id == "train-test-1"
     assert response.error is None
 
+    # Extract from CallToolResult format
     result = response.result
-    assert result["status"] == "completed"
+    assert "content" in result
+    assert "structuredContent" in result
+    assert "isError" in result
+    assert result["isError"] is False
+
+    structured = result["structuredContent"]
+    assert structured["status"] == "completed"
 
     # Model metadata
-    assert result["model"]["class"] == "SimpleClassifier"
-    assert result["model"]["num_parameters"] > 0
-    assert "hyperparameters" in result["model"]
+    assert structured["model"]["class"] == "SimpleClassifier"
+    assert structured["model"]["num_parameters"] > 0
+    assert "hyperparameters" in structured["model"]
 
     # Trainer metadata
-    assert result["trainer"]["max_epochs"] == 1
-    assert result["trainer"]["devices"] == 1
+    assert structured["trainer"]["max_epochs"] == 1
+    assert structured["trainer"]["devices"] == 1
 
     # Metrics must exist (values may vary)
-    assert "metrics" in result
-    assert isinstance(result["metrics"], dict)
+    assert "metrics" in structured
+    assert isinstance(structured["metrics"], dict)

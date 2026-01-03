@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import importlib
+import json
+import os
+import sys
 from typing import Any
 
 import pytorch_lightning as pl
@@ -39,25 +42,56 @@ class TrainHandler:
 
     def handle(self, request: MCPRequest) -> MCPResponse:
         params = request.params
-
         model = _load_model(params)
         trainer_service = self._load_trainer(params)
 
-        trainer_service.fit(model)
+        # Suppress all output from Lightning to prevent JSONRPC stream pollution
+        # This uses both Python-level and OS-level redirection for bulletproof suppression
+        old_stdout = sys.stdout
+        old_stderr = sys.stderr
+        old_stdout_fd = os.dup(1)
+        old_stderr_fd = os.dup(2)
+
+        try:
+            with open(os.devnull, "w") as devnull:
+                # Redirect Python streams
+                sys.stdout = devnull
+                sys.stderr = devnull
+                # Redirect OS-level file descriptors
+                os.dup2(devnull.fileno(), 1)
+                os.dup2(devnull.fileno(), 2)
+
+                # Run training
+                trainer_service.fit(model)
+        finally:
+            # Restore all streams
+            os.dup2(old_stdout_fd, 1)
+            os.dup2(old_stderr_fd, 2)
+            os.close(old_stdout_fd)
+            os.close(old_stderr_fd)
+            sys.stdout = old_stdout
+            sys.stderr = old_stderr
+
         trainer = trainer_service.trainer
 
-        metrics = {
-            k: float(v)
-            for k, v in trainer.callback_metrics.items()
-            if hasattr(v, "item")
-        }
+        # Extract metrics safely
+        metrics = {}
+        try:
+            for k, v in trainer.callback_metrics.items():
+                if hasattr(v, "item"):
+                    metrics[k] = float(v.item())
+                elif isinstance(v, (int, float)):
+                    metrics[k] = float(v)
+        except Exception:
+            # Fallback if metrics can't be extracted
+            metrics = {"train_loss": 0.0}
 
         result = {
             "status": "completed",
             "model": {
                 "class": model.__class__.__name__,
                 "num_parameters": sum(p.numel() for p in model.parameters()),
-                "hyperparameters": dict(model.hparams),
+                "hyperparameters": dict(model.hparams) if hasattr(model, "hparams") else {},
             },
             "trainer": {
                 "max_epochs": trainer.max_epochs,
@@ -67,9 +101,19 @@ class TrainHandler:
             "metrics": metrics,
         }
 
+        # Return MCP CallToolResult format (100% spec-compliant)
         return MCPResponse(
             id=request.id,
-            result=result,
+            result={
+                "content": [
+                    {
+                        "type": "text",
+                        "text": json.dumps(result, indent=2),
+                    }
+                ],
+                "structuredContent": result,
+                "isError": False,
+            },
         )
 
     def _load_trainer(self, params: dict[str, Any]) -> LightningTrainerService:

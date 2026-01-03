@@ -19,7 +19,7 @@ def test_list_tools_returns_expected_tools():
 
 def test_tools_have_required_fields():
     """
-    Each tool must declare name, description, and input_schema.
+    Each tool must declare name, description, and inputSchema (MCP spec requires camelCase).
     """
 
     tools = list_tools()
@@ -27,22 +27,22 @@ def test_tools_have_required_fields():
     for tool in tools:
         assert "name" in tool
         assert "description" in tool
-        assert "input_schema" in tool
+        assert "inputSchema" in tool
 
         assert isinstance(tool["name"], str)
         assert isinstance(tool["description"], str)
-        assert isinstance(tool["input_schema"], dict)
+        assert isinstance(tool["inputSchema"], dict)
 
 
 def test_tools_input_schema_is_json_schema_like():
     """
-    input_schema should look like a JSON Schema object.
+    inputSchema should look like a JSON Schema object.
     """
 
     tools = list_tools()
 
     for tool in tools:
-        schema = tool["input_schema"]
+        schema = tool["inputSchema"]
 
         assert "type" in schema
         assert schema["type"] == "object"
@@ -83,3 +83,39 @@ def test_stdio_server_tools_list_roundtrip():
 
     assert "lightning.train" in names
     assert "lightning.inspect" in names
+
+
+def test_stdio_server_tools_call_wrapper():
+    """
+    Test tools/call wrapper method (standard MCP SDK pattern).
+
+    Verifies that tools/call correctly routes to underlying tool method.
+    """
+
+    request = {
+        "id": "call-1",
+        "method": "tools/call",
+        "params": {
+            "name": "lightning.inspect",
+            "arguments": {"what": "environment"},
+        },
+    }
+
+    stdin = io.StringIO(json.dumps(request) + "\n")
+    stdout = io.StringIO()
+
+    server = MCPServer(stdin=stdin, stdout=stdout)
+    server.serve_forever()
+
+    stdout.seek(0)
+    response = json.loads(stdout.readline())
+
+    assert response["id"] == "call-1"
+    assert response["error"] is None
+    assert "content" in response["result"]
+    assert "structuredContent" in response["result"]
+    assert response["result"]["isError"] is False
+
+    structured = response["result"]["structuredContent"]
+    assert "python" in structured
+    assert "torch" in structured

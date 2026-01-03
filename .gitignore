@@ -18,6 +18,7 @@ build/
 dist/
 wheelhouse/
 
+.ruff_cache
 .pytest_cache/
 .coverage
 coverage.xml

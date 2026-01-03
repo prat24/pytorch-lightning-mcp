@@ -27,11 +27,18 @@ def test_inspect_model_metadata():
     assert response.id == "inspect-model"
     assert response.error is None
 
+    # Extract from CallToolResult format
     result = response.result
-    assert result["class"] == "SimpleClassifier"
-    assert result["num_parameters"] > 0
-    assert "trainable_parameters" in result
-    assert "hyperparameters" in result
+    assert "content" in result
+    assert "structuredContent" in result
+    assert "isError" in result
+    assert result["isError"] is False
+
+    structured = result["structuredContent"]
+    assert structured["class"] == "SimpleClassifier"
+    assert structured["num_parameters"] > 0
+    assert "trainable_parameters" in structured
+    assert "hyperparameters" in structured
 
 
 def test_inspect_environment():
@@ -54,8 +61,15 @@ def test_inspect_environment():
     assert response.id == "inspect-env"
     assert response.error is None
 
+    # Extract from CallToolResult format
     result = response.result
-    assert "python" in result
-    assert "torch" in result
-    assert "lightning" in result
-    assert isinstance(result["cuda_available"], bool)
+    assert "content" in result
+    assert "structuredContent" in result
+    assert "isError" in result
+    assert result["isError"] is False
+
+    structured = result["structuredContent"]
+    assert "python" in structured
+    assert "torch" in structured
+    assert "lightning" in structured
+    assert isinstance(structured["cuda_available"], bool)

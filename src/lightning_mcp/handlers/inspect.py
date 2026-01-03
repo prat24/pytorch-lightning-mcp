@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 from typing import Any
 
@@ -22,17 +23,27 @@ class InspectHandler:
             raise ValueError("Inspect requires 'what' field")
 
         if what == "model":
-            result = self._inspect_model(params)
+            structured = self._inspect_model(params)
         elif what == "environment":
-            result = self._inspect_environment()
+            structured = self._inspect_environment()
         elif what == "summary":
-            result = self._inspect_summary(params)
+            structured = self._inspect_summary(params)
         else:
             raise ValueError(f"Unknown inspect target '{what}'")
 
+        # Return MCP CallToolResult format (100% spec-compliant)
         return MCPResponse(
             id=request.id,
-            result=result,
+            result={
+                "content": [
+                    {
+                        "type": "text",
+                        "text": json.dumps(structured, indent=2),
+                    }
+                ],
+                "structuredContent": structured,
+                "isError": False,
+            },
         )
 
     def _inspect_model(self, params: dict[str, Any]) -> dict[str, Any]:

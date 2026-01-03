@@ -15,7 +15,7 @@ def list_tools() -> list[dict[str, Any]]:
         {
             "name": "lightning.train",
             "description": "Train a PyTorch Lightning model with explicit configuration.",
-            "input_schema": {
+            "inputSchema": {
                 "type": "object",
                 "properties": {
                     "model": {
@@ -33,7 +33,7 @@ def list_tools() -> list[dict[str, Any]]:
         {
             "name": "lightning.inspect",
             "description": "Inspect models or runtime environment.",
-            "input_schema": {
+            "inputSchema": {
                 "type": "object",
                 "properties": {
                     "what": {
