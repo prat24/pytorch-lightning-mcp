@@ -1,8 +1,9 @@
 from __future__ import annotations
+
+import pytorch_lightning as pl
 import torch
 from torch import nn
 from torch.utils.data import DataLoader, TensorDataset
-import pytorch_lightning as pl
 
 
 class SimpleClassifier(pl.LightningModule):
@@ -14,7 +15,7 @@ class SimpleClassifier(pl.LightningModule):
     - CPU/GPU agnostic
     """
 
-    def __init__(self, input_dim: int = 4, num_classes: int = 3, lr: float = 1e-3):
+    def __init__(self, input_dim: int = 4, num_classes: int = 3, lr: float = 1e-3):  # noqa: ARG002
         super().__init__()
         self.save_hyperparameters()
 
@@ -24,7 +25,7 @@ class SimpleClassifier(pl.LightningModule):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)
 
-    def training_step(self, batch, batch_idx: int):
+    def training_step(self, batch, _batch_idx: int):
         x, y = batch
         logits = self(x)
         loss = self.loss_fn(logits, y)

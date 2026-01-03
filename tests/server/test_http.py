@@ -2,7 +2,6 @@ from fastapi.testclient import TestClient
 
 from lightning_mcp.http_server import app
 
-
 client = TestClient(app)
 
 

@@ -1,8 +1,8 @@
-import json
 import io
+import json
 
-from lightning_mcp.tools import list_tools
 from lightning_mcp.server import MCPServer
+from lightning_mcp.tools import list_tools
 
 
 def test_list_tools_returns_expected_tools():

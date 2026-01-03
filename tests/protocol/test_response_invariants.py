@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from lightning_mcp.protocol import MCPResponse, MCPError
+from lightning_mcp.protocol import MCPError, MCPResponse
 
 
 def test_response_with_result_only():

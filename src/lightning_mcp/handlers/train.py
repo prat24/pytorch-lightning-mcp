@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 import importlib
 from typing import Any
+
 import pytorch_lightning as pl
 
 from lightning_mcp.lightning.trainer import LightningTrainerService

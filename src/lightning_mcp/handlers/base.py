@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from typing import Any
+
 import pytorch_lightning as pl
 
 from lightning_mcp.handlers.train import _load_model  # noqa: F401

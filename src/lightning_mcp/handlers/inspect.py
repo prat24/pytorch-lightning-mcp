@@ -1,12 +1,15 @@
 from __future__ import annotations
+
 import sys
 from typing import Any
+
 import pytorch_lightning as pl
 import torch
 from pytorch_lightning.utilities.model_summary import ModelSummary
 
-from lightning_mcp.protocol import MCPRequest, MCPResponse
 from lightning_mcp.handlers.train import _load_model
+from lightning_mcp.protocol import MCPRequest, MCPResponse
+
 
 class InspectHandler:
     """Production-grade inspection handler (read-only)."""

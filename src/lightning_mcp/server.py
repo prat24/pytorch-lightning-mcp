@@ -5,9 +5,9 @@ import sys
 import traceback
 from typing import TextIO
 
-from lightning_mcp.protocol import MCPRequest, MCPResponse, MCPError
-from lightning_mcp.handlers.train import TrainHandler
 from lightning_mcp.handlers.inspect import InspectHandler
+from lightning_mcp.handlers.train import TrainHandler
+from lightning_mcp.protocol import MCPError, MCPRequest, MCPResponse
 from lightning_mcp.tools import list_tools
 
 

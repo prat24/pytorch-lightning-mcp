@@ -19,6 +19,7 @@ def main() -> None:
 
     if args.http:
         import uvicorn
+
         from lightning_mcp.http_server import app
 
         uvicorn.run(app, host=args.host, port=args.port)

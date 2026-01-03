@@ -340,3 +340,58 @@ The inspection of the environment reveals the following setup:
 
 This setup indicates that the system is equipped for machine learning tasks using PyTorch and PyTorch Lightning on Apple hardware with MPS support for accelerated computing, but without CUDA support.
 ```
+
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+### Quick Start for Developers
+
+1. **Read the guides:**
+   - [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guidelines
+   - [DEVELOPMENT.md](DEVELOPMENT.md) - Development setup and workflow
+
+2. **Set up development environment:**
+   ```bash
+   git clone https://github.com/yourusername/pytorch-lightning-mcp.git
+   cd pytorch-lightning-mcp
+   uv sync --all-extras
+   ```
+
+3. **Run tests:**
+   ```bash
+   pytest tests/ -v
+   ```
+
+4. **Check code quality:**
+   ```bash
+   ruff check src/ tests/
+   mypy src/lightning_mcp --ignore-missing-imports
+   ```
+
+5. **Install pre-commit hooks:**
+   ```bash
+   pre-commit install
+   ```
+
+### Testing
+
+- All code must have tests
+- Run tests with: `pytest tests/ -v`
+- Check coverage: `pytest tests/ --cov=src/lightning_mcp`
+- Use tox for multi-version testing: `tox`
+
+### Code Standards
+
+- **Linting:** Ruff
+- **Type checking:** mypy
+- **Format:** Black-compatible (via Ruff)
+- **Pre-commit hooks:** Available (see [DEVELOPMENT.md](DEVELOPMENT.md))
+
+## Code of Conduct
+
+Please review our [Code of Conduct](CODE_OF_CONDUCT.md).
+
+## License
+
+This project is licensed under the [Apache License 2.0](LICENSE).
