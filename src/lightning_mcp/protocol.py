@@ -8,7 +8,15 @@ from pydantic import BaseModel, Field, model_validator
 class MCPRequest(BaseModel):
     """Incoming MCP request."""
 
+    jsonrpc: Literal["2.0"] = "2.0"
     id: str
+    method: str
+    params: dict[str, Any] = Field(default_factory=dict)
+
+class MCPNotification(BaseModel):
+    """Incoming MCP notification (no response required)."""
+
+    jsonrpc: Literal["2.0"] = "2.0"
     method: str
     params: dict[str, Any] = Field(default_factory=dict)
 
@@ -20,6 +28,9 @@ class MCPError(BaseModel):
     data: Any | None = None
 
 class MCPResponse(BaseModel):
+    """MCP response - fully compliant with JSON-RPC 2.0 and MCP spec."""
+    
+    jsonrpc: Literal["2.0"] = "2.0"
     id: str
     result: dict | None = None
     error: MCPError | None = None
@@ -36,8 +47,23 @@ class MCPResponse(BaseModel):
             )
         return self
 
+class ServerInfo(BaseModel):
+    """Server info returned by initialize."""
+    
+    name: str
+    version: str
+
+class InitializeResult(BaseModel):
+    """Result from initialize method."""
+    
+    protocolVersion: str
+    capabilities: dict[str, Any] = Field(default_factory=dict)
+    serverInfo: ServerInfo
+
 class MCPMethod:
     """Known MCP methods exposed by lightning-mcp."""
 
+    INITIALIZE: Literal["initialize"] = "initialize"
+    TOOLS_LIST: Literal["tools/list"] = "tools/list"
     TRAIN: Literal["lightning.train"] = "lightning.train"
     INSPECT: Literal["lightning.inspect"] = "lightning.inspect"

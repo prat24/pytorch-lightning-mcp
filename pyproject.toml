@@ -1,6 +1,6 @@
 [project]
 name = "lightning-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "Model Context Protocol (MCP) server for PyTorch Lightning"
 readme = "README.md"
 requires-python = ">=3.10,<3.13"
