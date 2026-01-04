@@ -8,6 +8,7 @@ from typing import TextIO
 
 from lightning_mcp.constants import PROTOCOL_VERSION, SERVER_VERSION
 from lightning_mcp.handlers.inspect import InspectHandler
+from lightning_mcp.handlers.predict import PredictHandler
 from lightning_mcp.handlers.test import TestHandler
 from lightning_mcp.handlers.train import TrainHandler
 from lightning_mcp.handlers.validate import ValidateHandler
@@ -40,6 +41,7 @@ class MCPServer:
         self._inspect_handler = InspectHandler()
         self._validate_handler = ValidateHandler()
         self._test_handler = TestHandler()
+        self._predict_handler = PredictHandler()
 
     def serve_forever(self) -> None:
         """Run the MCP server loop."""
@@ -129,6 +131,9 @@ class MCPServer:
 
         if request.method == "lightning.test":
             return self._test_handler.handle(request)
+
+        if request.method == "lightning.predict":
+            return self._predict_handler.handle(request)
 
         # Unknown method
         return MCPResponse(

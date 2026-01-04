@@ -34,3 +34,7 @@ class LightningTrainerService:
     def test(self, model: pl.LightningModule) -> None:
         """Run testing."""
         self._trainer.test(model)
+
+    def predict(self, model: pl.LightningModule, dataloaders: Any = None) -> list[Any]:
+        """Run prediction."""
+        return self._trainer.predict(model, dataloaders=dataloaders)
