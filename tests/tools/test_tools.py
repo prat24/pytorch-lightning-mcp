@@ -76,7 +76,7 @@ def test_stdio_server_tools_list_roundtrip():
     response = json.loads(stdout.readline())
 
     assert response["id"] == "tools-stdio-1"
-    assert response["error"] is None
+    assert "error" not in response
 
     tools = response["result"]["tools"]
     names = {tool["name"] for tool in tools}
@@ -111,7 +111,7 @@ def test_stdio_server_tools_call_wrapper():
     response = json.loads(stdout.readline())
 
     assert response["id"] == "call-1"
-    assert response["error"] is None
+    assert "error" not in response
     assert "content" in response["result"]
     assert "structuredContent" in response["result"]
     assert response["result"]["isError"] is False

@@ -26,7 +26,7 @@ class MCPResponse(BaseModel):
     """MCP response - fully compliant with JSON-RPC 2.0 and MCP spec."""
 
     jsonrpc: Literal["2.0"] = "2.0"
-    id: str
+    id: str | None
     result: dict | None = None
     error: MCPError | None = None
 

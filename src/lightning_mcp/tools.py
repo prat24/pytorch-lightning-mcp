@@ -102,4 +102,31 @@ def list_tools() -> list[dict[str, Any]]:
                 "required": ["model"],
             },
         },
+        {
+            "name": "lightning.checkpoint",
+            "description": "Manage model checkpoints: save, load, or list.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "action": {
+                        "type": "string",
+                        "enum": ["save", "load", "list"],
+                        "description": "Action to perform.",
+                    },
+                    "path": {
+                        "type": "string",
+                        "description": "Checkpoint file path (for save/load).",
+                    },
+                    "directory": {
+                        "type": "string",
+                        "description": "Directory to list checkpoints from.",
+                    },
+                    "model": {
+                        "type": "object",
+                        "description": "Model configuration (for save/load).",
+                    },
+                },
+                "required": ["action"],
+            },
+        },
     ]

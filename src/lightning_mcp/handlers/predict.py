@@ -39,7 +39,7 @@ class PredictHandler:
     def _load_trainer(self, params: dict[str, Any]) -> LightningTrainerService:
         cfg = params.get("trainer", {})
         if not isinstance(cfg, dict):
-            cfg = {}
+            raise TypeError("'trainer' must be a dict")
         return LightningTrainerService(**cfg)
 
     def _serialize_predictions(self, predictions: list[Any] | None) -> list[Any]:

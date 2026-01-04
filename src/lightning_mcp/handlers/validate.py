@@ -18,19 +18,16 @@ class ValidateHandler:
         trainer_service = self._load_trainer(params)
 
         # Run validation
-        results = trainer_service.validate(model)
+        trainer_service.validate(model)
 
         # Extract metrics
         metrics = {}
         trainer = trainer_service.trainer
-        try:
-            for k, v in trainer.callback_metrics.items():
-                if hasattr(v, "item"):
-                    metrics[k] = float(v.item())
-                elif isinstance(v, (int, float)):
-                    metrics[k] = float(v)
-        except Exception:
-            pass
+        for k, v in trainer.callback_metrics.items():
+            if hasattr(v, "item"):
+                metrics[k] = float(v.item())
+            elif isinstance(v, (int, float)):
+                metrics[k] = float(v)
 
         result = {
             "status": "completed",
@@ -46,5 +43,5 @@ class ValidateHandler:
     def _load_trainer(self, params: dict[str, Any]) -> LightningTrainerService:
         cfg = params.get("trainer", {})
         if not isinstance(cfg, dict):
-            cfg = {}
+            raise TypeError("'trainer' must be a dict")
         return LightningTrainerService(**cfg)

@@ -9,12 +9,13 @@ import importlib
 import json
 import os
 import sys
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Any, Generator
+from typing import Any
 
 import pytorch_lightning as pl
 
-from lightning_mcp.protocol import MCPRequest, MCPResponse
+from lightning_mcp.protocol import MCPResponse
 
 
 def load_model(params: dict[str, Any]) -> pl.LightningModule:

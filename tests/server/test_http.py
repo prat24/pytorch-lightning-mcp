@@ -20,7 +20,7 @@ def test_http_initialize():
     payload = response.json()
 
     assert payload["id"] == "init-1"
-    assert payload["error"] is None
+    assert "error" not in payload
     assert payload["result"]["protocolVersion"] == "2024-11-05"
     assert payload["result"]["serverInfo"]["name"] == "lightning-mcp"
     assert "capabilities" in payload["result"]
@@ -41,7 +41,7 @@ def test_http_tools_list():
     payload = response.json()
 
     assert payload["id"] == "tools-1"
-    assert payload["error"] is None
+    assert "error" not in payload
 
     tools = payload["result"]["tools"]
     names = {tool["name"] for tool in tools}
@@ -67,7 +67,7 @@ def test_http_tools_call_wrapper():
     payload = response.json()
 
     assert payload["id"] == "call-1"
-    assert payload["error"] is None
+    assert "error" not in payload
     assert "content" in payload["result"]
     assert "structuredContent" in payload["result"]
     assert payload["result"]["isError"] is False
@@ -96,7 +96,7 @@ def test_http_inspect_environment():
     payload = response.json()
 
     assert payload["id"] == "http-1"
-    assert payload["error"] is None
+    assert "error" not in payload
     assert "content" in payload["result"]
     assert "structuredContent" in payload["result"]
     assert "isError" in payload["result"]

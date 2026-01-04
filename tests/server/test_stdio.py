@@ -30,7 +30,7 @@ def test_stdio_server_initialize():
     response = json.loads(stdout.readline())
 
     assert response["id"] == "init-1"
-    assert response["error"] is None
+    assert "error" not in response
 
     result = response["result"]
     assert result["protocolVersion"] == "2024-11-05"
@@ -66,7 +66,7 @@ def test_stdio_server_inspect_environment_roundtrip():
     response = json.loads(stdout.readline())
 
     assert response["id"] == "stdio-1"
-    assert response["error"] is None
+    assert "error" not in response
     assert "content" in response["result"]
     assert "structuredContent" in response["result"]
     assert "isError" in response["result"]

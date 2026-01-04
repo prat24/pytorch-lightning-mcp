@@ -1,6 +1,16 @@
-import argparse
+"""Lightning MCP CLI entry point."""
 
-from lightning_mcp.server import MCPServer
+import argparse
+import os
+import sys
+import warnings
+
+# Suppress all warnings at import time to prevent polluting stdio MCP stream
+warnings.filterwarnings("ignore")
+
+# Suppress PyTorch/Lightning specific warnings
+os.environ.setdefault("PYTHONWARNINGS", "ignore")
+os.environ.setdefault("PL_DISABLE_FORK_CHECK", "1")
 
 
 def main() -> None:
@@ -24,4 +34,14 @@ def main() -> None:
 
         uvicorn.run(app, host=args.host, port=args.port)
     else:
-        MCPServer().serve_forever()
+        # For stdio mode, redirect stderr to devnull to keep JSON stream clean
+        with open(os.devnull, "w") as devnull:
+            sys.stderr = devnull
+
+            from lightning_mcp.server import MCPServer
+
+            MCPServer().serve_forever()
+
+
+if __name__ == "__main__":
+    main()

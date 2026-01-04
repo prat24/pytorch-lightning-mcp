@@ -7,10 +7,6 @@ from lightning_mcp.lightning.trainer import LightningTrainerService
 from lightning_mcp.protocol import MCPRequest, MCPResponse
 
 
-# Keep for backward compatibility (inspect.py imports this)
-_load_model = load_model
-
-
 class TrainHandler:
     """Production-grade Lightning training handler."""
 
@@ -24,17 +20,13 @@ class TrainHandler:
 
         trainer = trainer_service.trainer
 
-        # Extract metrics safely
+        # Extract metrics
         metrics = {}
-        try:
-            for k, v in trainer.callback_metrics.items():
-                if hasattr(v, "item"):
-                    metrics[k] = float(v.item())
-                elif isinstance(v, (int, float)):
-                    metrics[k] = float(v)
-        except Exception:
-            # Fallback if metrics can't be extracted
-            metrics = {"train_loss": 0.0}
+        for k, v in trainer.callback_metrics.items():
+            if hasattr(v, "item"):
+                metrics[k] = float(v.item())
+            elif isinstance(v, (int, float)):
+                metrics[k] = float(v)
 
         result = {
             "status": "completed",
