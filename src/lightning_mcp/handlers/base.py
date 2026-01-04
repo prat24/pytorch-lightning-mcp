@@ -1,6 +1,10 @@
 """Base utilities for Lightning MCP handlers.
 
-Shared code for model loading and MCP response building.
+Shared code for model loading, MCP response building, and output suppression.
+
+IMPORTANT: All handler operations that may produce stdout/stderr output
+(model instantiation, training, inference, etc.) MUST be wrapped with
+`suppress_output()` to prevent polluting the MCP JSON-RPC stream.
 """
 
 from __future__ import annotations

@@ -13,10 +13,23 @@ class LightningTrainerService:
     - isolate third-party APIs
     - centralize Trainer configuration
     - provide a stable interface for MCP handlers
+
+    Note:
+        Progress bar and logger are disabled by default to prevent
+        polluting stdout when used in MCP server context.
     """
 
     def __init__(self, **trainer_kwargs: Any) -> None:
-        self._trainer = Trainer(**trainer_kwargs)
+        # Disable progress bar and logger by default for MCP server use
+        # These can be overridden by explicit user config if needed
+        defaults = {
+            "enable_progress_bar": False,
+            "logger": False,
+            "enable_model_summary": False,
+        }
+        # User-provided kwargs take precedence
+        merged_kwargs = {**defaults, **trainer_kwargs}
+        self._trainer = Trainer(**merged_kwargs)
 
     @property
     def trainer(self) -> Trainer:
@@ -27,13 +40,13 @@ class LightningTrainerService:
         """Run training."""
         self._trainer.fit(model)
 
-    def validate(self, model: pl.LightningModule) -> None:
+    def validate(self, model: pl.LightningModule) -> list[dict[str, Any]]:
         """Run validation."""
-        self._trainer.validate(model)
+        return self._trainer.validate(model, verbose=False)
 
-    def test(self, model: pl.LightningModule) -> None:
+    def test(self, model: pl.LightningModule) -> list[dict[str, Any]]:
         """Run testing."""
-        self._trainer.test(model)
+        return self._trainer.test(model, verbose=False)
 
     def predict(self, model: pl.LightningModule, dataloaders: Any = None) -> list[Any]:
         """Run prediction."""

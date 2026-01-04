@@ -1,4 +1,8 @@
-"""Predict handler for PyTorch Lightning models."""
+"""Predict handler for PyTorch Lightning models.
+
+Provides model prediction/inference with full Trainer configuration support.
+All operations suppress stdout/stderr to avoid polluting MCP JSON-RPC stream.
+"""
 
 from __future__ import annotations
 
@@ -16,10 +20,10 @@ class PredictHandler:
 
     def handle(self, request: MCPRequest) -> MCPResponse:
         params = request.params
-        model = load_model(params)
-        trainer_service = self._load_trainer(params)
 
         with suppress_output():
+            model = load_model(params)
+            trainer_service = self._load_trainer(params)
             predictions = trainer_service.predict(model)
 
         # Convert predictions to serializable format

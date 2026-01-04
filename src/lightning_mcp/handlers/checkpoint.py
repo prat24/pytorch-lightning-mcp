@@ -1,4 +1,8 @@
-"""Checkpoint handler for PyTorch Lightning models."""
+"""Checkpoint handler for PyTorch Lightning models.
+
+Provides save, load, and list operations for model checkpoints.
+All operations suppress stdout/stderr to avoid polluting MCP JSON-RPC stream.
+"""
 
 from __future__ import annotations
 
@@ -8,7 +12,7 @@ from typing import Any
 
 import torch
 
-from lightning_mcp.handlers.base import build_tool_response, load_model
+from lightning_mcp.handlers.base import build_tool_response, load_model, suppress_output
 from lightning_mcp.protocol import MCPRequest, MCPResponse
 
 
@@ -34,17 +38,25 @@ class CheckpointHandler:
         return build_tool_response(request.id, result)
 
     def _save(self, params: dict[str, Any]) -> dict[str, Any]:
-        """Save model checkpoint."""
+        """Save model checkpoint.
+
+        Args:
+            params: Must contain 'path' and 'model' configuration.
+
+        Returns:
+            Dict with action, path, model_class, and num_parameters.
+        """
         path = params.get("path")
         if not isinstance(path, str):
             raise ValueError("'path' is required for save")
 
-        model = load_model(params)
+        with suppress_output():
+            model = load_model(params)
 
-        # Ensure directory exists
-        Path(path).parent.mkdir(parents=True, exist_ok=True)
+            # Ensure directory exists
+            Path(path).parent.mkdir(parents=True, exist_ok=True)
 
-        torch.save(model.state_dict(), path)
+            torch.save(model.state_dict(), path)
 
         return {
             "action": "save",
@@ -54,7 +66,14 @@ class CheckpointHandler:
         }
 
     def _load(self, params: dict[str, Any]) -> dict[str, Any]:
-        """Load model from checkpoint."""
+        """Load model from checkpoint.
+
+        Args:
+            params: Must contain 'path' and 'model' configuration.
+
+        Returns:
+            Dict with action, path, model_class, and num_parameters.
+        """
         path = params.get("path")
         if not isinstance(path, str):
             raise ValueError("'path' is required for load")
@@ -62,9 +81,10 @@ class CheckpointHandler:
         if not os.path.exists(path):
             raise FileNotFoundError(f"Checkpoint not found: {path}")
 
-        model = load_model(params)
-        state_dict = torch.load(path, weights_only=True)
-        model.load_state_dict(state_dict)
+        with suppress_output():
+            model = load_model(params)
+            state_dict = torch.load(path, weights_only=True)
+            model.load_state_dict(state_dict)
 
         return {
             "action": "load",

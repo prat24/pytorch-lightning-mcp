@@ -1,10 +1,14 @@
-"""Validation handler for PyTorch Lightning models."""
+"""Validate handler for PyTorch Lightning models.
+
+Provides model validation with full Trainer configuration support.
+All operations suppress stdout/stderr to avoid polluting MCP JSON-RPC stream.
+"""
 
 from __future__ import annotations
 
 from typing import Any
 
-from lightning_mcp.handlers.base import build_tool_response, load_model
+from lightning_mcp.handlers.base import build_tool_response, load_model, suppress_output
 from lightning_mcp.lightning.trainer import LightningTrainerService
 from lightning_mcp.protocol import MCPRequest, MCPResponse
 
@@ -14,11 +18,11 @@ class ValidateHandler:
 
     def handle(self, request: MCPRequest) -> MCPResponse:
         params = request.params
-        model = load_model(params)
-        trainer_service = self._load_trainer(params)
 
-        # Run validation
-        trainer_service.validate(model)
+        with suppress_output():
+            model = load_model(params)
+            trainer_service = self._load_trainer(params)
+            trainer_service.validate(model)
 
         # Extract metrics
         metrics = {}

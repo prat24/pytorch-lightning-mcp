@@ -1,4 +1,8 @@
-"""Test handler for PyTorch Lightning models."""
+"""Test handler for PyTorch Lightning models.
+
+Provides model testing with full Trainer configuration support.
+All operations suppress stdout/stderr to avoid polluting MCP JSON-RPC stream.
+"""
 
 from __future__ import annotations
 
@@ -14,10 +18,10 @@ class TestHandler:
 
     def handle(self, request: MCPRequest) -> MCPResponse:
         params = request.params
-        model = load_model(params)
-        trainer_service = self._load_trainer(params)
 
         with suppress_output():
+            model = load_model(params)
+            trainer_service = self._load_trainer(params)
             trainer_service.test(model)
 
         # Extract metrics
