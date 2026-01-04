@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from lightning_mcp.constants import PROTOCOL_VERSION, SERVER_VERSION
 from lightning_mcp.handlers.inspect import InspectHandler
 from lightning_mcp.handlers.train import TrainHandler
+from lightning_mcp.handlers.validate import ValidateHandler
 from lightning_mcp.protocol import MCPError, MCPRequest, MCPResponse
 from lightning_mcp.tools import list_tools
 
@@ -10,6 +11,7 @@ app = FastAPI(title="Lightning MCP Server")
 
 train_handler = TrainHandler()
 inspect_handler = InspectHandler()
+validate_handler = ValidateHandler()
 
 
 @app.post("/mcp")
@@ -52,6 +54,9 @@ def handle_mcp(request: MCPRequest) -> MCPResponse:
 
         if request.method == "lightning.inspect":
             return inspect_handler.handle(request)
+
+        if request.method == "lightning.validate":
+            return validate_handler.handle(request)
 
         return MCPResponse(
             id=request.id,

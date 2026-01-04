@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import sys
 from typing import Any
 
@@ -8,7 +7,7 @@ import pytorch_lightning as pl
 import torch
 from pytorch_lightning.utilities.model_summary import ModelSummary
 
-from lightning_mcp.handlers.train import _load_model
+from lightning_mcp.handlers.base import build_tool_response, load_model
 from lightning_mcp.protocol import MCPRequest, MCPResponse
 
 
@@ -31,23 +30,10 @@ class InspectHandler:
         else:
             raise ValueError(f"Unknown inspect target '{what}'")
 
-        # Return MCP CallToolResult format (100% spec-compliant)
-        return MCPResponse(
-            id=request.id,
-            result={
-                "content": [
-                    {
-                        "type": "text",
-                        "text": json.dumps(structured, indent=2),
-                    }
-                ],
-                "structuredContent": structured,
-                "isError": False,
-            },
-        )
+        return build_tool_response(request.id, structured)
 
     def _inspect_model(self, params: dict[str, Any]) -> dict[str, Any]:
-        model = _load_model(params)
+        model = load_model(params)
         return {
             "class": model.__class__.__name__,
             "num_parameters": sum(p.numel() for p in model.parameters()),
@@ -58,7 +44,7 @@ class InspectHandler:
         }
 
     def _inspect_summary(self, params: dict[str, Any]) -> dict[str, str]:
-        model = _load_model(params)
+        model = load_model(params)
         summary = ModelSummary(model, max_depth=2)
         return {"summary": str(summary)}
 
