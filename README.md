@@ -1,4 +1,4 @@
-# Lightning MCP
+# PyTorch Lightning MCP Server
 
 A minimal integration layer exposing PyTorch Lightning via a structured, machine-readable API for tools, agents, and orchestration systems.
 
@@ -7,7 +7,6 @@ A minimal integration layer exposing PyTorch Lightning via a structured, machine
 - Structured APIs for training, inspecting, validating, testing, predicting, and checkpointing models
 - PyTorch Lightning execution
 - Stdio and HTTP server modes
-- Clean,
 
 ## Requirements
 
