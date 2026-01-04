@@ -66,4 +66,22 @@ def list_tools() -> list[dict[str, Any]]:
                 "required": ["model"],
             },
         },
+        {
+            "name": "lightning.test",
+            "description": "Test a PyTorch Lightning model.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "model": {
+                        "type": "object",
+                        "description": "Model configuration (_target_ + kwargs).",
+                    },
+                    "trainer": {
+                        "type": "object",
+                        "description": "Trainer configuration.",
+                    },
+                },
+                "required": ["model"],
+            },
+        },
     ]
