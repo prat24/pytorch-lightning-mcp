@@ -18,7 +18,8 @@ build/
 dist/
 wheelhouse/
 
-.ruff_cache
+.mypy_cache/
+.ruff_cache/
 .pytest_cache/
 .coverage
 coverage.xml

@@ -1,4 +1,5 @@
 import traceback
+from typing import Any
 
 from fastapi import FastAPI
 
@@ -32,10 +33,11 @@ _tool_handlers = {
 }
 
 
-def _call_handler(request: MCPRequest, handler) -> MCPResponse:
+def _call_handler(request: MCPRequest, handler: Any) -> MCPResponse:
     """Call handler with proper JSON-RPC 2.0 error code mapping."""
     try:
-        return handler.handle(request)
+        result: MCPResponse = handler.handle(request)
+        return result
     except (ValueError, TypeError) as exc:
         # Invalid params (bad model config, missing fields, etc.)
         return MCPResponse(
@@ -62,15 +64,6 @@ def _dispatch_tool(request_id: str, tool_name: str, tool_params: dict) -> MCPRes
 
     Per MCP spec, unknown tools return -32602 (Invalid params).
     """
-    if not tool_name:
-        return MCPResponse(
-            id=request_id,
-            error=MCPError(
-                code=-32602,  # Invalid params
-                message="Missing required parameter: name",
-            ),
-        )
-
     handler = _tool_handlers.get(tool_name)
     if handler is None:
         # MCP spec: unknown tool returns -32602 Invalid params
@@ -120,6 +113,14 @@ def handle_mcp(request: MCPRequest) -> MCPResponse:
         if request.method == "tools/call":
             tool_name = request.params.get("name")
             tool_params = request.params.get("arguments", {})
+            if not isinstance(tool_name, str):
+                return MCPResponse(
+                    id=request.id,
+                    error=MCPError(
+                        code=-32602,
+                        message="Missing required parameter: name",
+                    ),
+                )
             return _dispatch_tool(request.id, tool_name, tool_params)
 
         # Lightning-specific tool methods (direct calls, not via tools/call)

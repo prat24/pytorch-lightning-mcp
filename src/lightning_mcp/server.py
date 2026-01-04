@@ -4,7 +4,7 @@ import json
 import logging
 import sys
 import traceback
-from typing import TextIO
+from typing import Any, TextIO
 
 from lightning_mcp.constants import PROTOCOL_VERSION, SERVER_VERSION
 from lightning_mcp.handlers.checkpoint import CheckpointHandler
@@ -229,10 +229,11 @@ class MCPServer:
         )
         return self._call_handler(synthetic_request, handler)
 
-    def _call_handler(self, request: MCPRequest, handler) -> MCPResponse:
+    def _call_handler(self, request: MCPRequest, handler: Any) -> MCPResponse:
         """Call handler with proper error code mapping."""
         try:
-            return handler.handle(request)
+            result: MCPResponse = handler.handle(request)
+            return result
         except (ValueError, TypeError) as exc:
             # Invalid params (bad model config, missing fields, etc.)
             return MCPResponse(

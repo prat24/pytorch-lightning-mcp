@@ -40,14 +40,14 @@ class LightningTrainerService:
         """Run training."""
         self._trainer.fit(model)
 
-    def validate(self, model: pl.LightningModule) -> list[dict[str, Any]]:
+    def validate(self, model: pl.LightningModule) -> list[Any]:
         """Run validation."""
-        return self._trainer.validate(model, verbose=False)
+        return list(self._trainer.validate(model, verbose=False))
 
-    def test(self, model: pl.LightningModule) -> list[dict[str, Any]]:
+    def test(self, model: pl.LightningModule) -> list[Any]:
         """Run testing."""
-        return self._trainer.test(model, verbose=False)
+        return list(self._trainer.test(model, verbose=False))
 
-    def predict(self, model: pl.LightningModule, dataloaders: Any = None) -> list[Any]:
+    def predict(self, model: pl.LightningModule, dataloaders: Any = None) -> list[Any] | None:
         """Run prediction."""
         return self._trainer.predict(model, dataloaders=dataloaders)
