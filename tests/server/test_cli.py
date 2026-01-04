@@ -2,12 +2,13 @@
 
 import json
 import subprocess
+import sys
 
 
 def run_mcp_command(request: dict) -> dict:
     """Run a single MCP request through the CLI."""
     result = subprocess.run(
-        ["uv", "run", "lightning-mcp"],
+        [sys.executable, "-m", "lightning_mcp.cli"],
         input=json.dumps(request) + "\n",
         capture_output=True,
         text=True,
